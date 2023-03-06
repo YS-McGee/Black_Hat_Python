@@ -150,15 +150,18 @@ def execute(cmd):
                                      stderr=subprocess.STDOUT)
     return output.decode()
 
-
 class NetCat:
+    
+    # NetCat object initializtion with args from CLI and buffer
     def __init__(self, args, buffer=None):
         self.args = args
         self.buffer = buffer
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)        # Create socket object
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
+    # Entry point
     def run(self):
+        # Execution delegation
         if self.args.listen:
             self.listen()
         else:
@@ -234,11 +237,14 @@ class NetCat:
                     self.socket.close()
                     sys.exit()
 
-
 if __name__ == '__main__':
+    
+    # create a CLI
     parser = argparse.ArgumentParser(
         description='BHP Net Tool',
         formatter_class=argparse.RawDescriptionHelpFormatter,
+        
+        # provide example usage when invoked with --help
         epilog=textwrap.dedent('''Example:
           netcat.py -t 192.168.1.108 -p 5555 -l -c # command shell
           netcat.py -t 192.168.1.108 -p 5555 -l -u=mytest.whatisup # upload to file
@@ -246,6 +252,9 @@ if __name__ == '__main__':
           echo 'ABCDEFGHI' | ./netcat.py -t 192.168.1.108 -p 135 # echo local text to server port 135
           netcat.py -t 192.168.1.108 -p 5555 # connect to server
           '''))
+    # six args specifying program behavior
+    # Listener: -c, -e, , -u, -l
+    # Sender: -t, -p
     parser.add_argument('-c', '--command', action='store_true', help='initialize command shell')
     parser.add_argument('-e', '--execute', help='execute specified command')
     parser.add_argument('-l', '--listen', action='store_true', help='listen')
@@ -253,10 +262,12 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--target', default='192.168.1.203', help='specified IP')
     parser.add_argument('-u', '--upload', help='upload file')
     args = parser.parse_args()
+    
+    # If set up as a listener...
     if args.listen:
-        buffer = ''
+        buffer = ''                # Empty buffer string
     else:
-        buffer = sys.stdin.read()
+        buffer = sys.stdin.read()  # Send buffer content from stdin
 
     nc = NetCat(args, buffer.encode('utf-8'))
     nc.run()
